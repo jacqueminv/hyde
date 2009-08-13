@@ -656,6 +656,16 @@ class TestProcessing(MonitorTests):
         blog_node = site.find_node(TEST_SITE.child_folder('content/blog'))
         assert context['categories'] == blog_node.categories
         
+    def test_node_injector(self):
+        self.generator = Generator(TEST_SITE.path)
+        self.generator.build_siteinfo()
+        site = settings.CONTEXT['site']
+        blog_node = site.find_node(TEST_SITE.child_folder('content/blog'))
+        self.generator.pre_process(site)
+        for post in site.walk_pages():
+            assert post.blog_node
+            assert post.blog_node == blog_node           
+            
 
 
 class TestPostProcessors:

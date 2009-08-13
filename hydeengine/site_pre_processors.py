@@ -31,3 +31,22 @@ class CategoriesManager:
                     categories[category].add(post)     
         context['categories'] = categories 
         node.categories = categories
+        
+class NodeInjector(object):
+        
+    """
+        Finds the node that represents the given path and injects it with the given     
+        variable name into all the posts contained in the current node.
+    """
+    @staticmethod
+    def process(folder, params):
+        context = settings.CONTEXT
+        site = context['site']
+        node = params['node']
+        varName = params['variable']
+        path = params['path']
+        nodeFromPathFragment = site.find_node(site.folder.parent.child_folder(path))
+        if not nodeFromPathFragment:
+            return
+        for post in node.walk_pages():
+            setattr(post, varName, nodeFromPathFragment)
