@@ -1,0 +1,29 @@
+{% extends '_post.html' %}
+{%hyde
+title: "Boot Camp - pas de sp1"
+created: 2007-10-31%}
+{% block article %}
+{% article %}
+Ayant installé Leopard je me réjouissais de tester Boot Camp qui est installé
+d'office avec le reste. Je lance donc l'utilitaire, insère mon cd de windows
+xp... tout se passe bien... Jusqu'à ce que mon ordi redémarre et bam une err.
+disque! Une visite sur [cette page][1] nous informe qu'il faut formater la
+partition où sera installé xp avant d'effectuer l'installation elle-même...
+Pour ceux qui pensait que Boot Camp préparait justement la partition pour le
+systèem cible, eh ben c'est raté! Bon pas grave, on recommence je me suis dit.
+Je relance donc l'installe en ayant pris soin de formater et houra xp se
+lance. Je démarre ensuite l'installation du service pack 2.... Et bam un
+message d'erreur vraiment spécial me disant qu'il me faut au moins 4mo
+d'espace disque... J'en ai plus de 30 go! Si vous vous trouvez dans la même
+situation sachez qu'il est possible grâce au logiciel [nLite][2] de combiner
+une licence windows xp sp1 au service pack sp2 et également de spécifier plein
+d'options pour votre installation. Ensuite plus qu'à graver l'image générée
+par nLite et tout ira bien!
+
+   [1]: http://docs.info.apple.com/article.html?artnum=306504-fr
+
+   [2]: http://www.nliteos.com/
+
+
+{% endarticle %}
+{% endblock %}

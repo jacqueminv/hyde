@@ -55,7 +55,6 @@ class CategoriesManager:
                         categories[category] = Category()
                     categories[category].posts.append(post)  
                     categories[category].posts.sort(key=operator.attrgetter("created"), reverse=True)
-        context['categories'] = categories 
         node.categories = categories
 
 class CategoriesArchiveGenerator:
