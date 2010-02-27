@@ -106,14 +106,14 @@ class RssGenerator:
             categories = node.categories
         if categories != None:
             #feed generation for each category
-            for category in categories.keys():
+            for category in categories:
                 #create a ContentNode adapter for categories to walk through the collection (walk_pages function)
                 #the same way than through the site's ContentNode
-                category_adapter = ContentNodeAdapter(categories[category])
+                category_adapter = ContentNodeAdapter(category)
                 feed = generator.generate(category_adapter)
-                feed_filename = "%s.xml" % (category.lower().replace(' ','_'))
+                feed_filename = "%s.xml" % (category["name"].lower().replace(' ','_'))
                 feed_url = "%s/%s/%s/%s" % (settings.SITE_WWW_URL, site.url, output_folder, feed_filename)
-                node.categories[category].feed_url = feed_url
+                category["feed_url"] = feed_url
                 RssGenerator._write_feed(feed, output_folder, feed_filename)
         feed = generator.generate(node)
         node.feed_url = "%s/%s/%s/%s" % (settings.SITE_WWW_URL, site.url, output_folder, "feed.xml")
@@ -137,7 +137,7 @@ class ContentNodeAdapter:
         self.category = category
 
     def walk_pages(self):
-        for post in self.category.posts:
+        for post in self.category["posts"]:
             yield post
 
 class FeedGenerator:

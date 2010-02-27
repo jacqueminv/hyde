@@ -18,10 +18,15 @@ from siteinfo import SiteNode
 """
 
 class Category:
-    def __init__(self):
+    def __init__(self, name=""):
         self.posts = []
         self.feed_url = None
         self.archive_url = None
+        self.name = name
+
+    @property
+    def name(self):
+        return self.name
     
     @property
     def posts(self):
@@ -40,22 +45,28 @@ class Category:
 class CategoriesManager:   
     """
     Fetch the category(ies) from every post under the given node
-    and creates a reference on them in CONTEXT and the node.
+    and creates a reference on them in the node.
     """
     @staticmethod
     def process(folder, params):
         context = settings.CONTEXT
         site = context['site']    
         node = params['node']
-        categories = {}                                      
+        categories = {}
         for post in node.walk_pages():
             if hasattr(post, 'categories') and post.categories != None:
                 for category in post.categories:
                     if categories.has_key(category) is False:
-                        categories[category] = Category()
+                        categories[category] = Category(category)
                     categories[category].posts.append(post)  
                     categories[category].posts.sort(key=operator.attrgetter("created"), reverse=True)
-        node.categories = categories
+        l = []
+        for category in categories.values():
+            l.append({"name": category.name,
+                      "posts": category.posts,
+                      "feed_url": category.feed_url,
+                      "post_count": len(category.posts)})
+        node.categories = l
 
 class CategoriesArchiveGenerator:
     @staticmethod
@@ -82,17 +93,17 @@ class CategoriesArchiveGenerator:
         else:
             raise ValueError("No template reference in CategoriesArchiveGenerator's settings")
 
-        for name, category in categories.iteritems():
-            archive_resource = "%s.html" % urllib.quote_plus(name)
-            category.archive_url = "/%s/%s" % (folder.name, "%s/%s" % (relative_folder, archive_resource))
+        for category in categories:
+            archive_resource = "%s.html" % urllib.quote_plus(category["name"])
+            category["archive_url"] = "/%s/%s" % (folder.name, "%s/%s" % (relative_folder, archive_resource))
             
         node.categories = categories
 
-        for category_name, category_obj in categories.iteritems():
-            name = urllib.quote_plus(category_name)
-            posts = category_obj.posts
+        for category in categories:
+            name = urllib.quote_plus(category["name"])
+            posts = category["posts"]
             archive_resource = "%s.html" % (name)
-            settings.CONTEXT.update({'category':category_name, 
+            settings.CONTEXT.update({'category':category["name"], 
                                                  'posts': posts,
                                                  'categories': categories})
             output = render_to_string(template, settings.CONTEXT)
