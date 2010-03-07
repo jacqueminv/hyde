@@ -14,6 +14,17 @@ class Processor(object):
         self.settings = settings 
         self.processor_cache = {}
         self._logger = None
+
+    def __init_pre_processors__(self):
+        default_pre_processors = {"hydeengine.site_pre_processors.ExcerptSetter":{}}
+        if self.settings.SITE_PRE_PROCESSORS.has_key("*") is False:
+            self.settings.SITE_PRE_PROCESSORS["*"] = default_pre_processors
+        else:
+            all_pre_processors = self.settings.SITE_PRE_PROCESSORS["*"]
+            for pre_processor, config in default_pre_processors.iteritems():
+                if all_pre_processors.has_key(pre_processor):
+                    continue
+                self.settings.SITE_PRE_PROCESSORS["*"][pre_processor] =  config
         
     @property
     def logger(self):
@@ -122,6 +133,7 @@ class Processor(object):
 
     def pre_process(self, node):
         self.logger.info("Pre processing %s" % str(node.folder))
+        self.__init_pre_processors__()
         self.__around_process__(node, self.settings.SITE_PRE_PROCESSORS)
           
     def post_process(self, node):
@@ -136,13 +148,17 @@ class Processor(object):
             fragment = fragment.rstrip("/")
             if not fragment:
                 fragment = "/"
-            if fragment in processors:           
+            processor_config = None
+            if fragment in processors:
                 processor_config = processors[fragment]
+            elif "*" in processors:
+                processor_config = processors["*"]
+            if processor_config is not None:
                 for processor_name, params in processor_config.iteritems():
                     self.logger.debug("           Executing %s" % processor_name)
                     processor = load_processor(processor_name) 
                     if not params:
                         params = {}
                     params.update( {'node': child})
-                    processor.process(child.temp_folder, params)
+                    processor.process(child.temp_folder, params) 
 

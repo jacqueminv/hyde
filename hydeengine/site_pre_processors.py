@@ -5,6 +5,7 @@ import codecs
 import urllib
 import operator
 from hydeengine.siteinfo import ContentNode
+from hydeengine.templatetags.hydetags import RenderExcerptNode
 from django.conf import settings
 from django.template.loader import render_to_string
 from hydeengine.file_system import Folder
@@ -135,3 +136,18 @@ class NodeInjector(object):
             for post in node.walk_pages():
                 setattr(post, varName, nodeFromPathFragment)
 
+class ExcerptSetter(object):
+    import re
+    regex = re.compile("{%\s*excerpt\s*%}")
+
+
+    @staticmethod
+    def process(folder, params):
+        node = params['node']
+        if node.type != "content":
+            return
+        context = settings.CONTEXT
+        for post in node.walk_pages():
+            content = post.file.read_all()
+            if ExcerptSetter.regex.search(content) is not None:
+                post.excerpt = True
