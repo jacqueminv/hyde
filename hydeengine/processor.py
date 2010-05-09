@@ -40,7 +40,7 @@ class Processor(object):
             
         logger = logging.getLogger("hyde_processor")
         logger.setLevel(loglevel)
-        ch = logging.StreamHandler()
+        ch = logging.StreamHandler(sys.stdout)
         ch.setLevel(loglevel)
         formatter = logging.Formatter("%(levelname)s:%(message)s[%(asctime)s]")
         ch.setFormatter(formatter)
@@ -148,17 +148,19 @@ class Processor(object):
             fragment = fragment.rstrip("/")
             if not fragment:
                 fragment = "/"
-            processor_config = None
-            if fragment in processors:
-                processor_config = processors[fragment]
-            elif "*" in processors:
-                processor_config = processors["*"]
-            if processor_config is not None:
-                for processor_name, params in processor_config.iteritems():
-                    self.logger.debug("           Executing %s" % processor_name)
-                    processor = load_processor(processor_name) 
-                    if not params:
-                        params = {}
-                    params.update( {'node': child})
-                    processor.process(child.temp_folder, params) 
 
+            processor_config = []
+            if fragment in processors:
+                processor_config.append(processors[fragment])
+            if "*" in processors:
+                processor_config.append(processors["*"])
+
+            if len(processor_config) > 0:
+                for pconfig in processor_config:
+                    for processor_name, params in pconfig.iteritems():
+                        self.logger.debug("           Executing %s" % processor_name)
+                        processor = load_processor(processor_name) 
+                        if not params:
+                            params = {}
+                        params.update( {'node': child})
+                        processor.process(child.temp_folder, params) 
