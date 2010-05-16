@@ -9,7 +9,7 @@ import urllib;
 if (not vars().has_key('ITUNES_AFFILIATE_ID')):
     ITUNES_AFFILIATE_ID = 'FU9TTuAveps'
 if (not vars().has_key('AMAZON_AFFILIATE_ID')):
-    AMAZON_AFFILIATE_ID = '6tringle-20'
+    AMAZON_AFFILIATE_ID = 'thpowo-21'
 
 register = template.Library()
 

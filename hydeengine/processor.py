@@ -16,15 +16,15 @@ class Processor(object):
         self._logger = None
 
     def __init_pre_processors__(self):
-        default_pre_processors = {"hydeengine.site_pre_processors.ExcerptSetter":{}}
+        default_pre_processors = [("hydeengine.sitepreprocessors.default.ExcerptSetter",{})]
         if self.settings.SITE_PRE_PROCESSORS.has_key("*") is False:
             self.settings.SITE_PRE_PROCESSORS["*"] = default_pre_processors
         else:
             all_pre_processors = self.settings.SITE_PRE_PROCESSORS["*"]
-            for pre_processor, config in default_pre_processors.iteritems():
-                if all_pre_processors.has_key(pre_processor):
+            for pre_processor in default_pre_processors:
+                if  pre_processor in all_pre_processors:
                     continue
-                self.settings.SITE_PRE_PROCESSORS["*"][pre_processor] =  config
+                self.settings.SITE_PRE_PROCESSORS["*"].insert(0, (pre_processor,config))
         
     @property
     def logger(self):
@@ -150,14 +150,14 @@ class Processor(object):
                 fragment = "/"
 
             processor_config = []
-            if fragment in processors:
+            if fragment in processors.keys():
                 processor_config.append(processors[fragment])
             if "*" in processors:
                 processor_config.append(processors["*"])
 
             if len(processor_config) > 0:
                 for pconfig in processor_config:
-                    for processor_name, params in pconfig.iteritems():
+                    for processor_name, params in pconfig:
                         self.logger.debug("           Executing %s" % processor_name)
                         processor = load_processor(processor_name) 
                         if not params:

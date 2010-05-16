@@ -8,3 +8,7 @@ deploy/*
 pylint*
 *.tmproj
 test_site
+hydeengine/converters/*
+output/*
+poxd/*
+templates/test/deploy/*

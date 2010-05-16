@@ -98,7 +98,7 @@ class RecentPostsNode(template.Node):
         if not self.node:
             self.node = context['site']
         else:
-            self.node = self.node.resolve(context)    
+            self.node = self.node.resolve(context)
         if not self.count == 5:
             self.count = self.count.render(context)    
             
@@ -201,10 +201,12 @@ class RenderArticleNode(template.Node):
             
 def get_bracketed_content(context, page, marker):
         rendered = None
-        original_page = context['page']
+        if context.has_key('page'):
+            original_page = context['page']
         context['page'] = page
         rendered = render_to_string(str(page), context)
-        context['page'] = original_page
+        if 'original_page' in locals():
+            context['page'] = original_page
         bracket_start = marker_start % marker
         bracket_end = marker_end % marker
         start = rendered.find(bracket_start)
