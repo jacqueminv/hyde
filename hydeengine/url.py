@@ -1,3 +1,5 @@
+import sys
+
 """
 Utility functions for dealing with urls. 
 
@@ -19,6 +21,8 @@ def fixslash(url, relative=True):
     otherwise ensures it is not.
 
     """
+    if sys.platform == "win32":
+        url = url.replace("\\","/")
     url = url.strip("/")
     if relative:
         url = "/" + url
