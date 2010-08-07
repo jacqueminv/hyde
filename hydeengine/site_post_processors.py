@@ -78,7 +78,7 @@ priority=%(priority).1f\n"
         config.close()
         generator = params["generator"]
         command = u"python %s --config=%s" % (generator, config_file)
-        p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         output = p.communicate()[0]
         code = p.returncode
         if code < 0: 
