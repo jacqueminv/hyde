@@ -6,7 +6,7 @@ from django.template.loader import render_to_string
 from file_system import File
 from datetime import datetime
 from hydeengine.templatetags.hydetags import xmldatetime
-import commands
+import subprocess
 import codecs
 
 class FolderFlattener:
@@ -78,8 +78,10 @@ priority=%(priority).1f\n"
         config.close()
         generator = params["generator"]
         command = u"python %s --config=%s" % (generator, config_file)
-        status, output = commands.getstatusoutput(command)
-        if status > 0: 
+        p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output = p.communicate()[0]
+        code = p.returncode
+        if code < 0: 
             print output
         File(config_file).delete()
         File(url_list_file).delete()
