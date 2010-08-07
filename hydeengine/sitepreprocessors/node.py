@@ -1,4 +1,5 @@
 from django.conf import settings
+import sys
 
 """
 Preprocessor providing nodes management:
@@ -16,6 +17,7 @@ class NodeInjector(object):
         context = settings.CONTEXT
         site = context['site']
         node = params['node']
+
         try:
             varName = params['variable']
             path = params['path']
@@ -23,6 +25,8 @@ class NodeInjector(object):
         except KeyError:
             pass
         for varName, path in params['injections'].iteritems():
+            if sys.platform == "win32":
+                path = path.replace("/", "\\")
             nodeFromPathFragment = site.find_node(site.folder.parent.child_folder(path))
             if not nodeFromPathFragment:
                 continue

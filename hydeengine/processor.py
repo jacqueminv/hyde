@@ -1,4 +1,5 @@
 import sys
+import os
 import logging
 import fnmatch
 from media_processors import TemplateProcessor
@@ -16,15 +17,15 @@ class Processor(object):
         self._logger = None
 
     def __init_pre_processors__(self):
-        default_pre_processors = [("hydeengine.sitepreprocessors.default.ExcerptSetter",{})]
+        default_pre_processors = {"hydeengine.sitepreprocessors.default.ExcerptSetter":{}}
         if self.settings.SITE_PRE_PROCESSORS.has_key("*") is False:
             self.settings.SITE_PRE_PROCESSORS["*"] = default_pre_processors
         else:
             all_pre_processors = self.settings.SITE_PRE_PROCESSORS["*"]
-            for pre_processor in default_pre_processors:
-                if  pre_processor in all_pre_processors:
+            for processor_name, processor_params in default_pre_processors.iteritems():
+                if  processor_name in all_pre_processors.keys():
                     continue
-                self.settings.SITE_PRE_PROCESSORS["*"].insert(0, (pre_processor,config))
+                self.settings.SITE_PRE_PROCESSORS["*"].insert(0, {processor_name: processor_params})
         
     @property
     def logger(self):
@@ -148,16 +149,20 @@ class Processor(object):
             fragment = fragment.rstrip("/")
             if not fragment:
                 fragment = "/"
+            elif fragment.endswith(os.sep):
+                fragment = fragment[:-1]
 
             processor_config = []
+
             if fragment in processors.keys():
                 processor_config.append(processors[fragment])
             if "*" in processors:
                 processor_config.append(processors["*"])
+                
 
             if len(processor_config) > 0:
                 for pconfig in processor_config:
-                    for processor_name, params in pconfig:
+                    for processor_name, params in pconfig.items():
                         self.logger.debug("           Executing %s" % processor_name)
                         processor = load_processor(processor_name) 
                         if not params:

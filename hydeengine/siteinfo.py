@@ -363,7 +363,12 @@ class ContentNode(SiteNode):
     @property
     def target_folder(self):
         deploy_folder = self.site.target_folder
-        return deploy_folder.child_folder_with_fragment(self.url)
+
+        url = self.url
+        if sys.platform == "win32":
+            url = url.replace("/", "\\")
+        
+        return deploy_folder.child_folder_with_fragment(url)
 
     @property
     def temp_folder(self):
@@ -427,12 +432,23 @@ class MediaNode(SiteNode):
     @property
     def target_folder(self):
         deploy_folder = self.site.target_folder
-        return deploy_folder.child_folder_with_fragment(self.url)
+
+        url = self.url
+        if sys.platform == "win32":
+            url = url.replace("/", "\\")
+        
+        target_folder = deploy_folder.child_folder_with_fragment(url)
+        return target_folder
 
     @property
     def temp_folder(self):
         temp_folder = self.site.temp_folder
-        return temp_folder.child_folder_with_fragment(self.fragment)      
+
+        url = self.url
+        if sys.platform == "win32":
+            url = url.replace("/", "\\")
+            
+        return temp_folder.child_folder_with_fragment(url)      
     
 class SiteInfo(SiteNode):
     def __init__(self, settings, site_path):
