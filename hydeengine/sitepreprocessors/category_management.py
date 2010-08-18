@@ -1,16 +1,13 @@
+from __future__ import with_statement
 from django.conf import settings
 from django.template.loader import render_to_string
-from codecs import open as copen
-from os import path, makedirs
-import operator
-import urllib
+import codecs, os, operator,  urllib
 
 """
 Preprocessor managing categories. Takes care of mainly two tasks:
-    - `CategoriesManager` injects the category listing into a custom `node`
-    - `CategoriesArchiveGenerator` creates an archive listing by categories;
-       needs the category listing on the node set in `params`, thus
-       `CategoriesManager` needs to be set as a SITE_PRE_PROCESSORS before.
+    - Injects the category listing into a custom `node`
+    - Creates an archive listing by categories;
+       needs the category listing on the node set in `params`
 """
 
 class Category:
@@ -74,6 +71,8 @@ class CategoriesManager:
                       "feed_url": category.feed_url,
                       "post_count": len(category.posts)})
         node.categories = l
+        for sub_node in node.walk():
+            sub_node.categories = l
 
         #archiving section
         archiving = 'archiving' in params.keys() and params['archiving'] is False or True
@@ -88,14 +87,14 @@ class CategoriesManager:
             if 'output_folder' in params and params['output_folder'] is not None \
                     and len(params['output_folder']) > 0:
                 relative_folder = output_folder = params['output_folder']
-            output_folder = path.join(settings.TMP_DIR, folder.name, output_folder)
-            if not path.isdir(output_folder):
-                makedirs(output_folder)
+            output_folder = os.path.join(settings.TMP_DIR, output_folder)
+            if not os.path.isdir(output_folder):
+                os.makedirs(output_folder)
 
             #: fetching default archive template
             template = None
             if 'template' in params:
-                template = path.join(settings.LAYOUT_DIR, params['template'])
+                template = os.path.join(settings.LAYOUT_DIR, params['template'])
             else:
                 raise ValueError("No template reference in CategoriesManager's settings")
 
@@ -112,7 +111,7 @@ class CategoriesManager:
                                          'posts': posts,
                                          'categories': categories})
                 output = render_to_string(template, settings.CONTEXT)
-                with copen(path.join(output_folder, \
+                with codecs.open(os.path.join(output_folder, \
                                      archive_resource), \
                                      "w", "utf-8") as file:
                     file.write(output)
