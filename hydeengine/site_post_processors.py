@@ -1,13 +1,11 @@
 from __future__ import with_statement
-import os
-import string
+import os, re,  string, subprocess, codecs
 from django.conf import settings
 from django.template.loader import render_to_string
 from file_system import File
 from datetime import datetime
 from hydeengine.templatetags.hydetags import xmldatetime
-import subprocess
-import codecs
+
 
 class FolderFlattener:
     
@@ -173,8 +171,6 @@ RSS2_FEED = \
       <link>%(url)s/</link>
       <description>%(description)s</description>
       <language>%(language)s</language>
-      <pubDate>%(publication_date)s</pubDate>
-      <lastBuildDate>%(last_build_date)s</lastBuildDate>
       <docs>http://blogs.law.harvard.edu/tech/rss</docs>
       <generator>Hyde</generator>
       <webMaster>%(webmaster)s</webMaster>
@@ -187,7 +183,8 @@ RSS2_ITEMS = \
       <item>
          <title>%(item_title)s</title>
          <link>%(item_link)s</link>
-         <description>%(description)s</description>
+         <guid>%(guid)s</guid>
+         <description><![CDATA[%(description)s]]></description>
          <pubDate>%(publication_date)s</pubDate>
          <author>%(author)s</author>
       </item>"""
@@ -198,6 +195,7 @@ class Rss2FeedGenerator(FeedGenerator):
     """
     def __init__(self):
         FeedGenerator.__init__(self)
+        self.re_content = re.compile(r"<!-- Hyde::Article::Begin -->(.*)<!-- Hyde::Article::End -->", re.DOTALL)
 
     def generate_items(self, node):
         items = ""
@@ -207,9 +205,10 @@ class Rss2FeedGenerator(FeedGenerator):
                 continue
             item_title = post.title
             item_link = post.full_url
-            description = ''
-            publication_date = post.created
-            #TODO let customisation of RSS2_ITEMS
+            guid = post.full_url
+            description = self.re_content.findall(post.temp_file.read_all())[0]
+            description = description.decode("utf-8")
+            publication_date = post.created.strftime("%d %b %y %H:%M GMT")
             cur_item = RSS2_ITEMS % locals()
             items = "%s%s" % (items, cur_item)
         return items
@@ -219,8 +218,6 @@ class Rss2FeedGenerator(FeedGenerator):
         url = settings.SITE_WWW_URL
         description = ''
         language = settings.LANGUAGE_CODE or 'en-us'
-        publication_date = ""
-        last_build_date = ""
         webmaster = settings.SITE_AUTHOR_EMAIL
         return RSS2_FEED % locals()
 
